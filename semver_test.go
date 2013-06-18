@@ -156,7 +156,7 @@ type compareTest struct {
 	reason string
 }
 
-func TestCompare(t *testing.T) {
+func TestCmp(t *testing.T) {
 	tests := []compareTest{
 		{Semver{Major: 1, Minor: 0, Patch: 0}, Semver{Major: 0, Minor: 1, Patch: 1}, 1, "major version left"},
 		{Semver{Major: 0, Minor: 1, Patch: 1}, Semver{Major: 1, Minor: 0, Patch: 0}, -1, "major version right"},
@@ -193,7 +193,7 @@ func TestCompare(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		val := test.a.Compare(test.b)
+		val := test.a.Cmp(test.b)
 		if val != test.exp {
 			t.Errorf("%s: %d != %d; a=%s,b=%s", test.reason, val, test.exp, test.a, test.b)
 		}

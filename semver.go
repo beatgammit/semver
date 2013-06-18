@@ -97,7 +97,7 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 	return ver.Validate()
 }
 
-// Compare compares two semantic versions:
+// Cmp compares two semantic versions:
 // - < 0 if a < b
 // - > 0 if a > b
 // - == 0 if a == b
@@ -109,7 +109,7 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 // - comparing identifiers lexically (in ASCII sort order)
 // - comparing numeric identifiers numerically
 // Numeric identifiers have lower precedence
-func (a Semver) Compare(b Semver) int {
+func (a Semver) Cmp(b Semver) int {
 	if a.Major != b.Major {
 		return a.Major - b.Major
 	}
