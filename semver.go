@@ -90,10 +90,6 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 		*ver, err = Parse(ver.Semver)
 	}
 
-	if ver.String() != ver.Semver {
-		return fmt.Errorf("semver must match parsed version")
-	}
-
 	return ver.Validate()
 }
 
