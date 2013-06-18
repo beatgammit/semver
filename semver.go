@@ -37,7 +37,7 @@ func Parse(semver string) (v Semver, err error) {
 	return
 }
 
-func (v *Semver) String() string {
+func (v Semver) String() string {
 	s := fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 	if v.Prerelease != "" {
 		s += "-" + v.Prerelease
@@ -60,8 +60,6 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 	if err = json.Unmarshal(arr, &tmap); err != nil {
 		return
 	}
-
-	fmt.Println(tmap)
 
 	rVal := reflect.ValueOf(ver)
 	for k, v := range tmap {
@@ -97,4 +95,68 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 	}
 
 	return ver.Validate()
+}
+
+// Compare compares two semantic versions:
+// - < 0 if a < b
+// - > 0 if a > b
+// - == 0 if a == b
+//
+// In order of importance: Major > Minor > Patch > Prerelease (Build ignored)
+//
+// Major, Minor and Patch are compared numerically.
+// Prerelease is compared by splitting on the . and:
+// - comparing identifiers lexically (in ASCII sort order)
+// - comparing numeric identifiers numerically
+// Numeric identifiers have lower precedence
+func (a Semver) Compare(b Semver) int {
+	if a.Major != b.Major {
+		return a.Major - b.Major
+	}
+	if a.Minor != b.Minor {
+		return a.Minor - b.Minor
+	}
+	if a.Patch != b.Patch {
+		return a.Patch - b.Patch
+	}
+
+	if a.Prerelease == "" {
+		if b.Prerelease == "" {
+			return 0
+		}
+		return 1
+	} else if b.Prerelease == "" {
+		// a.Prerelease != ""
+		return -1
+	}
+
+	partsA := strings.Split(a.Prerelease, ".")
+	partsB := strings.Split(b.Prerelease, ".")
+	total := len(partsA)
+	if len(partsB) < total {
+		total = len(partsB)
+	}
+	for i := 0; i < total; i++ {
+		sa, sb := partsA[i], partsB[i]
+		ai, errA := strconv.Atoi(sa)
+		bi, errB := strconv.Atoi(sb)
+
+		if errA != nil && errB != nil {
+			if sa < sb {
+				return -1
+			} else if sa > sb {
+				return 1
+			}
+		} else if errA == nil && errB == nil {
+			if ai != bi {
+				return ai - bi
+			}
+		} else if errA != nil {
+			return 1
+		} else if errB != nil {
+			return -1
+		}
+	}
+
+	return len(partsA) - len(partsB)
 }

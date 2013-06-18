@@ -14,6 +14,7 @@ package functions
 Semver
 ------
 
+* `Compare(Semver) int`- compares two semvers
 * `String() string`- constructs a semver string
 * `UnmarshalJSON([]byte) error`- for `encoding/json` compatibility
 * `Validate() error`- checks that the Semver struct is sane

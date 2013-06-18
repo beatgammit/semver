@@ -149,3 +149,53 @@ func TestUnmarshalJson(t *testing.T) {
 		}
 	}
 }
+
+type compareTest struct {
+	a, b   Semver
+	exp    int
+	reason string
+}
+
+func TestCompare(t *testing.T) {
+	tests := []compareTest{
+		{Semver{Major: 1, Minor: 0, Patch: 0}, Semver{Major: 0, Minor: 1, Patch: 1}, 1, "major version left"},
+		{Semver{Major: 0, Minor: 1, Patch: 1}, Semver{Major: 1, Minor: 0, Patch: 0}, -1, "major version right"},
+		{Semver{Major: 1, Minor: 1, Patch: 0}, Semver{Major: 1, Minor: 0, Patch: 1}, 1, "minor version left"},
+		{Semver{Major: 1, Minor: 0, Patch: 1}, Semver{Major: 1, Minor: 1, Patch: 0}, -1, "minor version right"},
+		{Semver{Major: 1, Minor: 1, Patch: 1}, Semver{Major: 1, Minor: 1, Patch: 0}, 1, "patch version left"},
+		{Semver{Major: 1, Minor: 1, Patch: 0}, Semver{Major: 1, Minor: 1, Patch: 1}, -1, "patch version right"},
+		{Semver{Major: 1, Minor: 1, Patch: 1}, Semver{Major: 1, Minor: 1, Patch: 1}, 0, "equal (no prerelease)"},
+
+		{Semver{}, Semver{Prerelease: "a"}, 1, "no prerelease trumps prerelease (left)"},
+		{Semver{Prerelease: "a"}, Semver{}, -1, "no prerelease trumps prerelease (right)"},
+
+		{Semver{Prerelease: "a"}, Semver{Prerelease: "a"}, 0, "equal prerelease strings"},
+		{Semver{Prerelease: "1"}, Semver{Prerelease: "1"}, 0, "equal prerelease numbers"},
+
+		{Semver{Prerelease: "b"}, Semver{Prerelease: "a"}, 1, "string compare (left)"},
+		{Semver{Prerelease: "a"}, Semver{Prerelease: "b"}, -1, "string compare (right)"},
+
+		{Semver{Prerelease: "1"}, Semver{Prerelease: "0"}, 1, "number compare (left)"},
+		{Semver{Prerelease: "0"}, Semver{Prerelease: "1"}, -1, "number compare (right)"},
+		{Semver{Prerelease: "02"}, Semver{Prerelease: "1"}, 1, "number compare two digits (left)"},
+		{Semver{Prerelease: "1"}, Semver{Prerelease: "02"}, -1, "number compare two digits (right)"},
+
+		{Semver{Prerelease: "b.1"}, Semver{Prerelease: "a.1"}, 1, "multiple; first (left)"},
+		{Semver{Prerelease: "a.1"}, Semver{Prerelease: "b.1"}, -1, "multiple; first (right)"},
+		{Semver{Prerelease: "a.2"}, Semver{Prerelease: "a.1"}, 1, "multiple; secnond (left)"},
+		{Semver{Prerelease: "a.1"}, Semver{Prerelease: "a.2"}, -1, "multiple; second (right)"},
+
+		{Semver{Prerelease: "a.1"}, Semver{Prerelease: "a"}, 1, "length mismatch (left)"},
+		{Semver{Prerelease: "a"}, Semver{Prerelease: "a.1"}, -1, "length mismatch (right)"},
+
+		{Semver{Prerelease: "a"}, Semver{Prerelease: "1"}, 1, "mismatch type (left)"},
+		{Semver{Prerelease: "1"}, Semver{Prerelease: "a"}, -1, "mismatch type (right)"},
+	}
+
+	for _, test := range tests {
+		val := test.a.Compare(test.b)
+		if val != test.exp {
+			t.Errorf("%s: %d != %d; a=%s,b=%s", test.reason, val, test.exp, test.a, test.b)
+		}
+	}
+}
