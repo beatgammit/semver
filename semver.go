@@ -61,6 +61,10 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 		return
 	}
 
+	if tmap["semver"] == nil && tmap["major"] == nil && tmap["minor"] == nil && tmap["patch"] == nil {
+		return fmt.Errorf("must provide at least one of: semver, major, minor, patch")
+	}
+
 	rVal := reflect.ValueOf(ver)
 	for k, v := range tmap {
 		field := rVal.Elem().FieldByName(strings.Title(k))
@@ -78,15 +82,15 @@ func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
 					return
 				}
 				field.SetInt(int64(val))
+			} else {
+				return fmt.Errorf("invalid type for key: %s", k)
 			}
 		}
 	}
 
 	if ver.Semver == "" {
-		return fmt.Errorf("semver must not be empty")
-	}
-
-	if ver.Major == 0 && ver.Minor == 0 && ver.Patch == 0 {
+		ver.Semver = ver.String()
+	} else if ver.Major == 0 && ver.Minor == 0 && ver.Patch == 0 {
 		*ver, err = Parse(ver.Semver)
 	}
 
