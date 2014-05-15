@@ -122,12 +122,13 @@ func TestUnmarshalJson(t *testing.T) {
 		{`{"semver": "1.0.0-test"}`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
 		{`{"semver": "1.0.0+test"}`, Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
 		{`{"semver": "1.0.0-blah+test"}`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
+		{`{"major": 1, "minor": 2, "patch": 3}`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "without semver in json"},
 	}
 
 	for _, test := range good {
 		var ver Semver
 		if err := json.Unmarshal([]byte(test.given), &ver); err != nil {
-			t.Errorf("%s: %s; given: %s", test.reason, err, test.given)
+			t.Errorf("%s: %s; given: %s - %#v", test.reason, err, test.given, ver)
 		}
 	}
 
@@ -145,7 +146,7 @@ func TestUnmarshalJson(t *testing.T) {
 	for _, test := range bad {
 		var ver Semver
 		if err := json.Unmarshal([]byte(test.given), &ver); err == nil {
-			t.Errorf("%s: given: %s", test.reason, test.given)
+			t.Errorf("%s: given: %s - %#v", test.reason, test.given, ver)
 		}
 	}
 }
