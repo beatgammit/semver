@@ -116,13 +116,10 @@ type badJsonTest struct {
 
 func TestUnmarshalJson(t *testing.T) {
 	good := []goodJsonTest{
-		{`{"semver": "1.0.0"}`, Semver{Semver: "1.0.0", Major: 1}, "basic"},
-		{`{"semver": "1.2.3", "major": 1, "minor": 2, "patch": 3}`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "ints parse"},
-		{`{"semver": "1.2.3", "major": "1", "minor": "2", "patch": "3"}`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "strings parse"},
-		{`{"semver": "1.0.0-test"}`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
-		{`{"semver": "1.0.0+test"}`, Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
-		{`{"semver": "1.0.0-blah+test"}`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
-		{`{"major": 1, "minor": 2, "patch": 3}`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "without semver in json"},
+		{`"1.2.3"`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "basic"},
+		{`"1.0.0-test"`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
+		{`"1.0.0+test"`, Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
+		{`"1.0.0-blah+test"`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
 	}
 
 	for _, test := range good {
@@ -133,14 +130,12 @@ func TestUnmarshalJson(t *testing.T) {
 	}
 
 	bad := []badJsonTest{
-		{`[]`, "invalid json"},
-		{`{}`, "empty (no semver)"},
-		{`{"semver": {}}`, "wrong type for semver"},
-		//{`{"semver": "1.0.0", "major": 2}`, "semver doesn't match"},
-		//{`{"semver": "-1.0.0"}`, "fails validation"},
-		{`{"semver": "1.0.0", "major": "a"}`, "major not a number"},
-		{`{"semver": "1.0.0", "minor": "b"}`, "minor not a number"},
-		{`{"semver": "1.0.0", "patch": "c"}`, "patch not a number"},
+		{`[]`, "wrong type (array)"},
+		{`{}`, "wrong type (object)"},
+		{`"-1.0.0"`, "fails validation"},
+		{`"a.0.0"`, "major not a number"},
+		{`"1.b.0"`, "minor not a number"},
+		{`"1.0.c"`, "patch not a number"},
 	}
 
 	for _, test := range bad {
