@@ -3,7 +3,6 @@ package semver
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -55,45 +54,19 @@ func (v *Semver) Validate() error {
 	return nil
 }
 
+func (ver Semver) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ver.String())
+}
+
 func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
-	var tmap map[string]interface{}
-	if err = json.Unmarshal(arr, &tmap); err != nil {
+	var semver string
+	if err = json.Unmarshal(arr, &semver); err != nil {
 		return
 	}
-
-	if tmap["semver"] == nil && tmap["major"] == nil && tmap["minor"] == nil && tmap["patch"] == nil {
-		return fmt.Errorf("must provide at least one of: semver, major, minor, patch")
+	*ver, err = Parse(semver)
+	if err != nil {
+		return
 	}
-
-	rVal := reflect.ValueOf(ver)
-	for k, v := range tmap {
-		field := rVal.Elem().FieldByName(strings.Title(k))
-		valType := reflect.TypeOf(v)
-		if valType.AssignableTo(field.Type()) {
-			field.Set(reflect.ValueOf(v))
-		} else if valType.ConvertibleTo(field.Type()) {
-			field.Set(reflect.ValueOf(v).Convert(field.Type()))
-		} else {
-			// we'll only get here for Major, Minor & Patch
-			if valType.Kind() == reflect.String {
-				var val int
-				val, err = strconv.Atoi(v.(string))
-				if err != nil {
-					return
-				}
-				field.SetInt(int64(val))
-			} else {
-				return fmt.Errorf("invalid type for key: %s", k)
-			}
-		}
-	}
-
-	if ver.Semver == "" {
-		ver.Semver = ver.String()
-	} else if ver.Major == 0 && ver.Minor == 0 && ver.Patch == 0 {
-		*ver, err = Parse(ver.Semver)
-	}
-
 	return ver.Validate()
 }
 
