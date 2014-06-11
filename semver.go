@@ -1,7 +1,6 @@
 package semver
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -54,20 +53,16 @@ func (v *Semver) Validate() error {
 	return nil
 }
 
-func (ver Semver) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ver.String())
+func (ver *Semver) UnmarshalText(arr []byte) error {
+    v, err := Parse(string(arr))
+    if err == nil {
+        *ver = v
+    }
+    return err
 }
 
-func (ver *Semver) UnmarshalJSON(arr []byte) (err error) {
-	var semver string
-	if err = json.Unmarshal(arr, &semver); err != nil {
-		return
-	}
-	*ver, err = Parse(semver)
-	if err != nil {
-		return
-	}
-	return ver.Validate()
+func (ver *Semver) MarshalText() ([]byte, error) {
+    return []byte(ver.String()), nil
 }
 
 // Cmp compares two semantic versions:

@@ -146,6 +146,22 @@ func TestUnmarshalJson(t *testing.T) {
 	}
 }
 
+func TestUnmarshalText(t *testing.T) {
+	good := []goodJsonTest{
+		{"1.2.3", Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "basic"},
+		{"1.0.0-test", Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
+		{"1.0.0+test", Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
+		{"1.0.0-blah+test", Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
+	}
+
+	for _, test := range good {
+		var ver Semver
+		if err := (&ver).UnmarshalText([]byte(test.given)); err != nil {
+			t.Errorf("%s: %s; given: %s - %#v", test.reason, err, test.given, ver)
+		}
+	}
+}
+
 type compareTest struct {
 	a, b   Semver
 	exp    int
