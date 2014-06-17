@@ -18,8 +18,10 @@ type badParseTest struct {
 
 func TestParseValid(t *testing.T) {
 	tests := []goodParseTest{
+		{"v1.0.0", Semver{Major: 1, Minor: 0, Patch: 0}, "optional 'v' prefix"},
 		{"1.0.0", Semver{Major: 1, Minor: 0, Patch: 0}, "no prerelease or build"},
 		{"1.0.0-test", Semver{Major: 1, Minor: 0, Patch: 0, Prerelease: "test"}, "prerelease but no build"},
+		{"1.0.0-test.123", Semver{Major: 1, Minor: 0, Patch: 0, Prerelease: "test.123"}, "prerelease with dot"},
 		{"1.0.0-test+5334", Semver{Major: 1, Minor: 0, Patch: 0, Prerelease: "test", Build: "5334"}, "prerelease and build"},
 		{"1.0.0+5334", Semver{Major: 1, Minor: 0, Patch: 0, Build: "5334"}, "build, but no prerelease"},
 	}

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var semverReg = regexp.MustCompile("^(\\d+).(\\d+).(\\d+)(?:-([0-9A-Za-z-.]+))?(?:\\+([0-9A-Za-z-.]+))?$")
+var semverReg = regexp.MustCompile("^v?(\\d+).(\\d+).(\\d+)(?:-([0-9A-Za-z-.]+))?(?:\\+([0-9A-Za-z-.]+))?$")
 
 type Semver struct {
 	Semver     string `json:"semver"`
@@ -54,15 +54,15 @@ func (v *Semver) Validate() error {
 }
 
 func (ver *Semver) UnmarshalText(arr []byte) error {
-    v, err := Parse(string(arr))
-    if err == nil {
-        *ver = v
-    }
-    return err
+	v, err := Parse(string(arr))
+	if err == nil {
+		*ver = v
+	}
+	return err
 }
 
 func (ver Semver) MarshalText() ([]byte, error) {
-    return []byte(ver.String()), nil
+	return []byte(ver.String()), nil
 }
 
 // Cmp compares two semantic versions:
