@@ -61,7 +61,7 @@ func (ver *Semver) UnmarshalText(arr []byte) error {
     return err
 }
 
-func (ver *Semver) MarshalText() ([]byte, error) {
+func (ver Semver) MarshalText() ([]byte, error) {
     return []byte(ver.String()), nil
 }
 
