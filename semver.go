@@ -53,6 +53,15 @@ func (v *Semver) Validate() error {
 	return nil
 }
 
+func (ver Semver) MarshalJSON() ([]byte, error) {
+    b, err := ver.MarshalText()
+    return []byte(fmt.Sprintf(`"%s"`, string(b))), err
+}
+
+func (ver *Semver) UnmarshalJSON(arr []byte) error {
+    return ver.UnmarshalText(arr[1:len(arr)-1])
+}
+
 func (ver *Semver) UnmarshalText(arr []byte) error {
 	v, err := Parse(string(arr))
 	if err == nil {
