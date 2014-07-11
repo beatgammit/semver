@@ -3,18 +3,29 @@ semver [![Build Status](https://travis-ci.org/beatgammit/semver.png)](https://tr
 
 semver is a [semantic versioning](http://semver.org/) library for Go.
 
+example
+-------
+
+    package main
+
+    import "github.com/beatgammit/semver"
+
+    func main() {
+        ver, err := semver.Parse("1.2.3-beta+jp")
+        if err != nil {
+            panic(err)
+        }
+        println(ver.String())
+    }
+
 api
 ===
 
-package functions
------------------
+[godoc](https://godoc.org/github.com/beatgammit/semver)
 
-* `Parse(string) (Semver, error)`- parses and validates a Semver string
+`semver.Semver` implements the following interfaces from the standard libary:
 
-Semver
-------
-
-* `Cmp(Semver) int`- compares two semvers
-* `String() string`- constructs a semver string
-* `UnmarshalJSON([]byte) error`- for `encoding/json` compatibility
-* `Validate() error`- checks that the Semver struct is sane
+* `encoding.TextMarshaler`
+* `encoding.TextUnmarshaler`
+* `json.Marshaler`
+* `json.Unmarshaler`

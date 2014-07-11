@@ -27,7 +27,6 @@ func TestParseValid(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		test.exp.Semver = test.given
 		v, err := Parse(test.given)
 		if err != nil {
 			t.Errorf("%s: error parsing: %s; given: %s", test.reason, err, test.given)
@@ -63,9 +62,9 @@ type validateTest struct {
 
 func TestValidate(t *testing.T) {
 	bad := []validateTest{
-		{Semver{"-1.0.0", -1, 0, 0, "", ""}, "negative major version"},
-		{Semver{"0.-1.0", 0, -1, 0, "", ""}, "negative minor version"},
-		{Semver{"0.0.-1", 0, 0, -1, "", ""}, "negative patch version"},
+		{Semver{-1, 0, 0, "", ""}, "negative major version"},
+		{Semver{0, -1, 0, "", ""}, "negative minor version"},
+		{Semver{0, 0, -1, "", ""}, "negative patch version"},
 	}
 
 	for _, test := range bad {
@@ -75,7 +74,7 @@ func TestValidate(t *testing.T) {
 	}
 
 	good := []validateTest{
-		{Semver{"1.0.0", 1, 0, 0, "", ""}, "basic"},
+		{Semver{1, 0, 0, "", ""}, "basic"},
 	}
 
 	for _, test := range good {
@@ -92,10 +91,10 @@ type stringTest struct {
 
 func TestString(t *testing.T) {
 	tests := []stringTest{
-		{Semver{"", 1, 0, 0, "", ""}, "1.0.0", "basic"},
-		{Semver{"", 1, 0, 0, "test", ""}, "1.0.0-test", "prerease, no build"},
-		{Semver{"", 1, 0, 0, "", "test"}, "1.0.0+test", "build, no prerease"},
-		{Semver{"", 1, 0, 0, "blah", "test"}, "1.0.0-blah+test", "prerelease and build"},
+		{Semver{1, 0, 0, "", ""}, "1.0.0", "basic"},
+		{Semver{1, 0, 0, "test", ""}, "1.0.0-test", "prerease, no build"},
+		{Semver{1, 0, 0, "", "test"}, "1.0.0+test", "build, no prerease"},
+		{Semver{1, 0, 0, "blah", "test"}, "1.0.0-blah+test", "prerelease and build"},
 	}
 
 	for _, test := range tests {
@@ -118,10 +117,10 @@ type badJsonTest struct {
 
 func TestUnmarshalJson(t *testing.T) {
 	good := []goodJsonTest{
-		{`"1.2.3"`, Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "basic"},
-		{`"1.0.0-test"`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
-		{`"1.0.0+test"`, Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
-		{`"1.0.0-blah+test"`, Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
+		{`"1.2.3"`, Semver{Major: 1, Minor: 2, Patch: 3}, "basic"},
+		{`"1.0.0-test"`, Semver{Major: 1, Prerelease: "test"}, "prerelease"},
+		{`"1.0.0+test"`, Semver{Major: 1, Build: "build"}, "build"},
+		{`"1.0.0-blah+test"`, Semver{Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
 	}
 
 	for _, test := range good {
@@ -150,10 +149,10 @@ func TestUnmarshalJson(t *testing.T) {
 
 func TestUnmarshalText(t *testing.T) {
 	good := []goodJsonTest{
-		{"1.2.3", Semver{Semver: "1.0.0", Major: 1, Minor: 2, Patch: 3}, "basic"},
-		{"1.0.0-test", Semver{Semver: "1.0.0", Major: 1, Prerelease: "test"}, "prerelease"},
-		{"1.0.0+test", Semver{Semver: "1.0.0", Major: 1, Build: "build"}, "build"},
-		{"1.0.0-blah+test", Semver{Semver: "1.0.0", Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
+		{"1.2.3", Semver{Major: 1, Minor: 2, Patch: 3}, "basic"},
+		{"1.0.0-test", Semver{Major: 1, Prerelease: "test"}, "prerelease"},
+		{"1.0.0+test", Semver{Major: 1, Build: "build"}, "build"},
+		{"1.0.0-blah+test", Semver{Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
 	}
 
 	for _, test := range good {

@@ -7,17 +7,17 @@ import (
 	"strings"
 )
 
-var semverReg = regexp.MustCompile("^v?(\\d+).(\\d+).(\\d+)(?:-([0-9A-Za-z-.]+))?(?:\\+([0-9A-Za-z-.]+))?$")
+var semverReg = regexp.MustCompile(`^v?(\d+).(\d+).(\d+)(?:-([0-9A-Za-z-.]+))?(?:\+([0-9A-Za-z-.]+))?$`)
 
 type Semver struct {
-	Semver     string `json:"semver"`
-	Major      int    `json:"major"`
-	Minor      int    `json:"minor"`
-	Patch      int    `json:"patch"`
-	Prerelease string `json:"prerelease,omitempty"`
-	Build      string `json:"build,omitempty"`
+	Major      int
+	Minor      int
+	Patch      int
+	Prerelease string
+	Build      string
 }
 
+// Parse parses semver into a Semver. A leading v may be included.
 func Parse(semver string) (v Semver, err error) {
 	pieces := semverReg.FindStringSubmatch(semver)
 	if pieces == nil {
@@ -30,11 +30,11 @@ func Parse(semver string) (v Semver, err error) {
 	v.Patch, _ = strconv.Atoi(pieces[3])
 	v.Prerelease = pieces[4]
 	v.Build = pieces[5]
-	v.Semver = semver
 	err = v.Validate()
 	return
 }
 
+// String produces a Semver string.
 func (v Semver) String() string {
 	s := fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)
 	if v.Prerelease != "" {
@@ -46,7 +46,10 @@ func (v Semver) String() string {
 	return s
 }
 
-func (v *Semver) Validate() error {
+// Validate checks a semver for appropriate values.
+// The outputs of String(), MarshalJSON and MarshalText are only guaranteed to be valid
+// semvers if this function does not return an error.
+func (v Semver) Validate() error {
 	if v.Major < 0 || v.Minor < 0 || v.Patch < 0 {
 		return fmt.Errorf("Major, minor and patch version numbers must be non-negative")
 	}
@@ -54,12 +57,12 @@ func (v *Semver) Validate() error {
 }
 
 func (ver Semver) MarshalJSON() ([]byte, error) {
-    b, err := ver.MarshalText()
-    return []byte(fmt.Sprintf(`"%s"`, string(b))), err
+	b, err := ver.MarshalText()
+	return []byte(fmt.Sprintf(`"%s"`, string(b))), err
 }
 
 func (ver *Semver) UnmarshalJSON(arr []byte) error {
-    return ver.UnmarshalText(arr[1:len(arr)-1])
+	return ver.UnmarshalText(arr[1 : len(arr)-1])
 }
 
 func (ver *Semver) UnmarshalText(arr []byte) error {
