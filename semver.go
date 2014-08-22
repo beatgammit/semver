@@ -1,13 +1,23 @@
 package semver
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 var semverReg = regexp.MustCompile(`^v?(\d+).(\d+).(\d+)(?:-([0-9A-Za-z-.]+))?(?:\+([0-9A-Za-z-.]+))?$`)
+
+type semver struct {
+	Major      int
+	Minor      int
+	Patch      int
+	Prerelease string
+	Build      string
+}
 
 type Semver struct {
 	Major      int
@@ -52,6 +62,8 @@ func (v Semver) String() string {
 func (v Semver) Validate() error {
 	if v.Major < 0 || v.Minor < 0 || v.Patch < 0 {
 		return fmt.Errorf("Major, minor and patch version numbers must be non-negative")
+	} else if v.Major == 0 && v.Minor == 0 && v.Patch == 0 {
+		return fmt.Errorf("Must supply at least one of: major, minor, patch")
 	}
 	return nil
 }
@@ -62,6 +74,26 @@ func (ver Semver) MarshalJSON() ([]byte, error) {
 }
 
 func (ver *Semver) UnmarshalJSON(arr []byte) error {
+	for _, c := range arr {
+		// TODO: this is completely gross
+		if !unicode.IsSpace(rune(c)) {
+			if c == '{' {
+				var sem semver
+				// we can't just unmarshal into a Semver because
+				// we'd end up with infinite recursion
+				if err := json.Unmarshal(arr, &sem); err != nil {
+					return err
+				}
+				ver.Major = sem.Major
+				ver.Minor = sem.Minor
+				ver.Patch = sem.Patch
+				ver.Prerelease = sem.Prerelease
+				ver.Build = sem.Build
+				return ver.Validate()
+			}
+			break
+		}
+	}
 	return ver.UnmarshalText(arr[1 : len(arr)-1])
 }
 

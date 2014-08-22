@@ -121,6 +121,7 @@ func TestUnmarshalJson(t *testing.T) {
 		{`"1.0.0-test"`, Semver{Major: 1, Prerelease: "test"}, "prerelease"},
 		{`"1.0.0+test"`, Semver{Major: 1, Build: "build"}, "build"},
 		{`"1.0.0-blah+test"`, Semver{Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
+		{`{"major": 1, "minor": 0, "patch": 0, "prerelease": "blah", "build": "test"}`, Semver{Major: 1, Prerelease: "blah", Build: "build"}, "prerelease and build"},
 	}
 
 	for _, test := range good {
