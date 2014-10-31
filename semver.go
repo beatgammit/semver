@@ -36,6 +36,15 @@ func Parse(semver string) (v Semver, err error) {
 	return
 }
 
+// MustParse parses semver into a semver. It will panic if there is an error in parsing.
+func MustParse(semver string) Semver {
+	if ver, err := Parse(semver); err != nil {
+		panic(err)
+	} else {
+		return ver
+	}
+}
+
 // String produces a Semver string.
 func (v Semver) String() string {
 	s := fmt.Sprintf("%d.%d.%d", v.Major, v.Minor, v.Patch)

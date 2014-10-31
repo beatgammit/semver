@@ -213,3 +213,20 @@ func TestCmp(t *testing.T) {
 		}
 	}
 }
+
+func TestMustParseValid(t *testing.T) {
+	defer func() {
+		if err := recover(); err != nil {
+			t.Errorf("unexpected panic for valid semver string: %s", err)
+		}
+	}()
+	MustParse("1.0.0-test.123")
+}
+
+func TestMustParseInvalid(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+	MustParse("1.3.4.0.2")
+	t.Error("MustParse should have panicked for invalid semver string")
+}
